@@ -15,13 +15,13 @@ frame = Frame(root)
 paddings = {'padx': 5, 'pady': 5} 
 
 # label
-label = ttk.Label(frame,  text='Linha ou Rabisco:')
+label = ttk.Label(frame,  text='Paint:')
 label.grid(column=0, row=0, sticky=W, **paddings)
 
 # option menu
 tipo_figura_var = StringVar(root) # Guarda o tipo de figura selecionado no option menu (linha ou rabisco)
 option_menu = ttk.OptionMenu(frame, tipo_figura_var,
-                             'Linha', 'Linha', 'Rabisco', 'Circulo')
+                             'Linha', 'Linha', 'Rabisco', 'Retangulo')
 option_menu.grid(column=1, row=0, sticky=W, **paddings)
 
 # Area de desenho
