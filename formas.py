@@ -1,7 +1,12 @@
 # funções tipo desenhar_circulo(), desenhar_quadrado()...
 
 from tkinter import *
-from tkinter import ttk
+
+canvas = None
+tipo_figura_var = None
+
+figuras = []
+figura_nova = None
 
 # Quando mouse é pressionado
 def iniciar_figura_nova(event): 

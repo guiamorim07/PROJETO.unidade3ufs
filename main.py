@@ -2,11 +2,9 @@
 
 from tkinter import *
 from tkinter import ttk
-
+import formas
+from formas import iniciar_figura_nova, atualizar_figura_nova, incluir_figura_nova
 # ponto de entrada, criaremos a janela e chamaremos as funcoes
-
-figuras = []       # Todas as figuras desenhadas
-figura_nova = None # Figura que esta sendo desenhada, mas ainda nao foi incluida em figuras
 
 root = Tk()
 frame = Frame(root)
@@ -30,6 +28,8 @@ canvas.grid(column=0, row=1, columnspan=2, sticky=W, **paddings)
 
 frame.pack()
 
+formas.canvas = canvas
+formas.tipo_figura_var = tipo_figura_var
 # Eventos de mouse associados ao canvas - com seus callbacks
 canvas.bind('<ButtonPress-1>', iniciar_figura_nova)
 canvas.bind('<B1-Motion>', atualizar_figura_nova)
