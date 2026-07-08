@@ -17,6 +17,8 @@ def iniciar_figura_nova(event):
         figura_nova = ('retangulo', (event.x, event.y, event.x, event.y))
     elif tipo_figura_var.get() == 'Oval':
         figura_nova = ('oval', (event.x, event.y, event.x, event.y))
+    elif tipo_figura_var.get() == 'Circulo':
+        figura_nova = ('circulo', (event.x, event.y, event.x, event.y))
     else :
         figura_nova = ("rabisco", [(event.x, event.y)])
 
@@ -29,6 +31,14 @@ def atualizar_figura_nova(event):
         figura_nova = ('retangulo', (figura_nova[1][0], figura_nova[1][1], event.x, event.y))
     elif figura_nova[0] == 'oval':
         figura_nova = ('oval', (figura_nova[1][0], figura_nova[1][1], event.x, event.y))
+    elif figura_nova[0] == 'circulo':
+        x0, y0 = figura_nova[1][0], figura_nova[1][1]  
+        dx = event.x - x0
+        dy = event.y - y0
+        lado = max(abs(dx), abs(dy)) 
+        x1 = x0 + lado if dx >= 0 else x0 - lado
+        y1 = y0 + lado if dy >= 0 else y0 - lado
+        figura_nova = ('circulo', (x0, y0, x1, y1))
     else : # figura_nova[0] == "linha"
         figura_nova = ("linha", (figura_nova[1][0], figura_nova[1][1], event.x, event.y))
     desenhar_figuras()
@@ -49,6 +59,8 @@ def desenhar_figuras():
             canvas.create_rectangle(values[0], values[1], values[2], values[3])
         elif fig == 'oval':
             canvas.create_oval(values[0], values[1], values[2], values[3])
+        elif fig == 'circulo' :
+            canvas.create_oval(values[0], values[1], values[2], values[3])
         else : # fig == "rabisco"
             canvas.create_line(values)
 
@@ -59,6 +71,8 @@ def desenhar_figura_nova():
     elif fig == 'retangulo':
         canvas.create_rectangle(values[0], values[1], values[2], values[3], dash=(4, 2))
     elif fig == 'oval':
+        canvas.create_oval(values[0], values[1], values[2], values[3], dash=(4, 2))
+    elif fig == 'circulo' :
         canvas.create_oval(values[0], values[1], values[2], values[3], dash=(4, 2))
     else : # fig == "rabisco"
         canvas.create_line(values, dash=(4, 2))
@@ -71,6 +85,8 @@ def incompleta(figura):
         return values[0] == values[2] or values[1] == values[3] 
     elif fig == 'oval':
         return values[0] == values[2] or values[1] == values[3]
+    elif fig == 'circulo' :
+        return values[0] == values[2]
     else : # fig == "rabisco"
         return len(values) <= 1
 
