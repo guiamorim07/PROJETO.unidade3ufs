@@ -121,3 +121,90 @@ def incompleta(figura):
 
 
 
+
+
+
+#Criei hierarquia de classes Figura (Linha, FiguraDoisPontos, Retangulo, Oval, Circulo, Rabisco) com métodos desenhar, atualizar e incompleta
+# falta colocar o código de desenho para usar essas classes e definir se ficara em formas.py ou vao criar uma nova classe para gerenciar as figuras e o canvas
+# deixei ela aqui para não perder o código que já estava feito, mas podemos mover para outro arquivo se for melhor organizar assim
+#lemnbrando que ainda falta fazer a forma poligonos e demais atividades
+# Ass: Gustavo"
+
+
+
+class Figura:
+    def __init__(self, cor_borda, cor_preenchimento):
+        self.cor_borda = cor_borda
+        self.cor_preenchimento = cor_preenchimento
+
+    def desenhar(self, canvas, preview=False): 
+        pass
+
+    def atualizar(self, x, y): 
+        pass
+
+    def incompleta(self):
+        pass
+
+class Linha(Figura):
+    def __init__(self, x0, x1, y0, y1, cor_borda):
+        super().__init__(cor_borda, '')
+        self.x0 = x0
+        self.y0 = y0
+        self.x1 = x1
+        self.y1 = y1
+
+    def desenhar(self, canvas, preview=False):
+        canvas.create_line(self.x0, self.y0, self.x1, self.y1, dash=(4, 2) if preview else None, fill=self.cor_borda)
+
+    def atualizar(self, x, y):
+        self.x1 = x
+        self.y1 = y
+
+    def incompleta(self):
+        return (self.x0, self.y0) == (self.x1, self.y1)
+    
+
+
+class FiguraDoisPontos(Figura):
+    def __init__(self, x0, x1, y0, y1, cor_borda, cor_preenchimento):
+        super().__init__(cor_borda, cor_preenchimento)
+        self.x0 = x0
+        self.x1 = x1
+        self.y0 = y0
+        self.y1 = y1
+
+    def atualizar(self, x, y):
+        self.x1 = x
+        self.y1 = y
+
+    def incompleta(self):
+        return (self.x0 == self.x1) or (self.y0 == self.y1)
+
+class Retangulo(FiguraDoisPontos):
+    def desenhar(self, canvas, preview=False):
+        canvas.create_rectangle(self.x0, self.y0, self.x1, self.y1, outline=self.cor_borda, fill=self.cor_preenchimento if not self.incompleta() else '', dash=(4, 2) if preview else None)
+
+class Oval(FiguraDoisPontos):
+    def desenhar(self, canvas, preview=False):
+        canvas.create_oval(self.x0, self.y0, self.x1, self.y1, outline=self.cor_borda, fill=self.cor_preenchimento if not self.incompleta() else '', dash=(4, 2) if preview else None)
+
+class Circulo(Oval):
+    def atualizar(self, x, y):
+        lado = max(abs(x - self.x0), abs(y - self.y0))
+        self.x1 = self.x0 + lado if x >= self.x0 else self.x0 - lado
+        self.y1 = self.y0 + lado if y >= self.y0 else self.y0 - lado
+
+class Rabisco(Figura):
+    def __init__(self, pontos, cor_borda):
+        super().__init__(cor_borda, "")
+        self.pontos = pontos
+
+    def desenhar(self, canvas, preview=False):
+        canvas.create_line(self.pontos, fill=self.cor_borda, dash=(4,2) if preview else None)
+
+    def atualizar(self, x, y):
+        self.pontos.append((x, y))
+
+    def incompleta(self):
+        return len(self.pontos) <= 1
