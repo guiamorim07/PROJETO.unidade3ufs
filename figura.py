@@ -2,8 +2,18 @@
 
 import json
 
-from formas import CLASSES_FIGURA
+
+
 from formas import figuras
+
+
+TIPO= {  "Linha": Linha,
+                "Retangulo": Retangulo,
+                 "Oval": Oval,
+              "Circulo": Circulo,
+                 "Rabisco": Rabisco,
+                 "Poligono": Poligono}
+
 class Figura:
     """Classe base abstrata para todas as figuras."""
     
@@ -51,7 +61,7 @@ class Linha(Figura):
         self.y1 = y
  
     def incompleta(self):
-        return (self.x0, self.y1) == (self.x1, self.x0)
+        return (self.x0, self.y0) == (self.x1, self.y1)
         
         
         
@@ -84,7 +94,7 @@ class FiguraDoisPontos(Figura):
         self.y1 = y
  
     def incompleta(self):
-        return (self.x0 == self.y0) or (self.x1 == self.y1)
+        return (self.x0 == self.x1) or (self.y0 == self.y1)
  
     def _cor_preenchimento_desenho(self, preview):
         return self.cor_preenchimento if not (preview and self.incompleta()) else ''
@@ -223,33 +233,32 @@ class Poligono(Figura):
 class Arquivo: 
     # é uma classe de serviço, apenas para salvarmos e carregarmos os arquivos, por isso nao utilizamos construtores nem atributos
     
-    class Arquivo:
     def salvar(self, figuras, caminho):
         dados = [figura.para_dict() for figura in figuras]
         with open(caminho, "w") as arquivo:
             json.dump(dados, arquivo)
     
     def abrir(self, caminho):
-    with open(caminho, "r") as arquivo:
-        dados = json.load(arquivo) #load nao basta para reconhecer o arquivo como objeto, por isso criamos o metodo criar_figura, para transformar o arquivo novamente em objeto
-    return [self._criar_figura(d) for d in dados]
+        with open(caminho, "r") as arquivo:
+            dados = json.load(arquivo) #load nao basta para reconhecer o arquivo como objeto, por isso criamos o metodo criar_figura, para transformar o arquivo novamente em objeto
+        return [self._criar_figura(d) for d in dados]
     
     
     def _criar_figura(self, d): #metodo que transformar o dado em objeto
-    d = dict(d)
-    tipo = d.pop("tipo")
-    classe = CLASSES_FIGURA[tipo]
+        d = dict(d)
+        tipo = d.pop("tipo")
+        classe = TIPO[tipo]
 
-    if tipo == "Poligono":
-        pontos = d.pop("pontos")
-        x0, y0 = pontos[0]
-        figura = Poligono(x0, y0, d["cor_borda"], d["cor_preenchimento"])
-        for x, y in pontos[1:]:
-            figura.adicionar_ponto(x, y)
-        figura.finalizar()
-        return figura
+        if tipo == "Poligono":
+            pontos = d.pop("pontos")
+            x0, y0 = pontos[0]
+            figura = Poligono(x0, y0, d["cor_borda"], d["cor_preenchimento"])
+            for x, y in pontos[1:]:
+                figura.adicionar_ponto(x, y)
+            figura.finalizar()
+            return figura
 
-    return classe(**d)
+        return classe(**d)
     
     
     
