@@ -1,7 +1,12 @@
 """Arquivo criado para a atualização do código (P.I -> P.O.O)"""
 
+import json
+
+from formas import CLASSES_FIGURA
+from formas import figuras
 class Figura:
     """Classe base abstrata para todas as figuras."""
+    
  
     def __init__(self, cor_borda, cor_preenchimento):
         self.cor_borda = cor_borda
@@ -20,7 +25,13 @@ class Figura:
         """Indica se a figura ainda não tem tamanho/forma válida para
         ser incluída na lista definitiva de figuras."""
         raise NotImplementedError
- 
+        
+    def para_dict(self): 
+     # aqui é o metodo generico, utilizei o mecanismo de overide para garantir que apenas as informações que eu quero entrem nos dicionarios, coisa que nao seria garantida caso as subclasses herdassem de forma pura esse metodo
+        return {
+            "tipo": type(self).__name__,
+            **self.__dict__
+        }
  
 class Linha(Figura):
     def __init__(self, x0, y0, x1, y1, cor_borda):
@@ -40,8 +51,22 @@ class Linha(Figura):
         self.y1 = y
  
     def incompleta(self):
-        return (self.x0, self.y0) == (self.x1, self.y1)
- 
+        return (self.x0, self.y1) == (self.x1, self.x0)
+        
+        
+        
+    def para_dict(self):
+     #transformar as informações do desenho em dados a serem lidos e guardados para utilizar na classe Arquivos
+      
+        return { "tipo": type(self).__name__,
+                 "x0"  :  self.x0, 
+                 "y0"  : self.y0, 
+                 "x1"  : self.x1, 
+                 "y1"  : self.y1, 
+                 "cor_borda" : self.cor_borda}
+                 
+    
+     
  
 class FiguraDoisPontos(Figura):
     """Base para figuras definidas por dois pontos opostos (um retângulo
@@ -59,13 +84,25 @@ class FiguraDoisPontos(Figura):
         self.y1 = y
  
     def incompleta(self):
-        return (self.x0 == self.x1) or (self.y0 == self.y1)
+        return (self.x0 == self.y0) or (self.x1 == self.y1)
  
     def _cor_preenchimento_desenho(self, preview):
         return self.cor_preenchimento if not (preview and self.incompleta()) else ''
- 
+    
+    
+    def para_dict(self):
+     #transformar as informações do desenho em dados a serem lidos e guardados para utilizar na classe Arquivos
+        return { "tipo": type(self).__name__,
+                 "x0"  :  self.x0, 
+                 "y0"  : self.y0, 
+                 "x1"  : self.x1, 
+                 "y1"  : self.y1, 
+                 "cor_borda" : self.cor_borda,
+                 "cor_preenchimento" : self.cor_preenchimento }
+    
  
 class Retangulo(FiguraDoisPontos):
+
     def desenhar(self, canvas, preview=False):
         canvas.create_rectangle(
             self.x0, self.y0, self.x1, self.y1,
@@ -110,6 +147,15 @@ class Rabisco(Figura):
  
     def incompleta(self):
         return len(self.pontos) <= 1
+        
+        
+        
+    def para_dict(self): 
+       #transformar as informações do desenho em dados a serem lidos e guardados para utilizar na classe Arquivos
+        return { "tipo": type(self).__name__,
+                 "pontos" : self.pontos,
+                 "cor_borda" : self.cor_borda}
+    
  
  
 class Poligono(Figura):
@@ -118,7 +164,7 @@ class Poligono(Figura):
     é construído por uma sequência de cliques:
       - cada clique esquerdo adiciona um vértice
       - o movimento do mouse mostra uma prévia do próximo segmento
-      - um duplo-clique (ou clique direito) finaliza o polígono
+      - um duplo-clique (ou clique direito) finaliza o polígono 
     """
  
     def __init__(self, x, y, cor_borda, cor_preenchimento):
@@ -160,3 +206,56 @@ class Poligono(Figura):
  
     def incompleta(self):
         return (not self.finalizado) or len(self.pontos) < 3
+        
+        
+        
+        
+    def para_dict(self):
+        return {
+            "tipo": type(self).__name__,
+            "cor_borda": self.cor_borda,
+            "cor_preenchimento": self.cor_preenchimento,
+            "pontos": self.pontos
+        }     
+        
+        
+        
+class Arquivo: 
+    # é uma classe de serviço, apenas para salvarmos e carregarmos os arquivos, por isso nao utilizamos construtores nem atributos
+    
+    class Arquivo:
+    def salvar(self, figuras, caminho):
+        dados = [figura.para_dict() for figura in figuras]
+        with open(caminho, "w") as arquivo:
+            json.dump(dados, arquivo)
+    
+    def abrir(self, caminho):
+    with open(caminho, "r") as arquivo:
+        dados = json.load(arquivo) #load nao basta para reconhecer o arquivo como objeto, por isso criamos o metodo criar_figura, para transformar o arquivo novamente em objeto
+    return [self._criar_figura(d) for d in dados]
+    
+    
+    def _criar_figura(self, d): #metodo que transformar o dado em objeto
+    d = dict(d)
+    tipo = d.pop("tipo")
+    classe = CLASSES_FIGURA[tipo]
+
+    if tipo == "Poligono":
+        pontos = d.pop("pontos")
+        x0, y0 = pontos[0]
+        figura = Poligono(x0, y0, d["cor_borda"], d["cor_preenchimento"])
+        for x, y in pontos[1:]:
+            figura.adicionar_ponto(x, y)
+        figura.finalizar()
+        return figura
+
+    return classe(**d)
+    
+    
+    
+    
+    
+    
+    
+        
+        

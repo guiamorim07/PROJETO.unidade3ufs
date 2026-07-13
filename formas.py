@@ -12,11 +12,14 @@ preencher_var = None
 figuras = []
 figura_nova = None
 
-CLASSES_FIGURA = {
-    'Retangulo': Retangulo,
-    'Oval': Oval,
-    'Circulo': Circulo,
-}
+
+    
+CLASSES_FIGURA= {  "Linha": Linha,
+                "Retangulo": Retangulo,
+                 "Oval": Oval,
+              "Circulo": Circulo,
+                 "Rabisco": Rabisco,
+                 "Poligono": Poligono,}
 
 def obter_cor_preenchimento():
     """Retorna a cor de preenchimento a usar, ou '' (transparente) se a opção de preencher estiver desligada."""
