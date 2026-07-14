@@ -2,18 +2,6 @@
 
 import json
 
-
-
-from formas import figuras
-
-
-TIPO= {  "Linha": Linha,
-                "Retangulo": Retangulo,
-                 "Oval": Oval,
-              "Circulo": Circulo,
-                 "Rabisco": Rabisco,
-                 "Poligono": Poligono}
-
 class Figura:
     """Classe base abstrata para todas as figuras."""
     
@@ -228,7 +216,14 @@ class Poligono(Figura):
             "pontos": self.pontos
         }     
         
-        
+TIPO= {  "Linha": Linha,
+                "Retangulo": Retangulo,
+                 "Oval": Oval,
+              "Circulo": Circulo,
+                 "Rabisco": Rabisco,
+                 "Poligono": Poligono}     
+
+
         
 class Arquivo: 
     # é uma classe de serviço, apenas para salvarmos e carregarmos os arquivos, por isso nao utilizamos construtores nem atributos

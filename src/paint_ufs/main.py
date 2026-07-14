@@ -3,8 +3,8 @@
 from tkinter import *
 from tkinter import ttk
 from tkinter import colorchooser
-import formas
-from formas import (iniciar_figura_nova, 
+import src.paint_ufs.formas as formas
+from src.paint_ufs.formas import (iniciar_figura_nova, 
                     atualizar_figura_nova, 
                     incluir_figura_nova, 
                     mover_mouse, 
@@ -13,21 +13,30 @@ from formas import (iniciar_figura_nova,
 
 
 root = Tk()
+root.title("Paint")
+root.geometry("800x700")
+
 frame = Frame(root)
+frame.pack(fill=BOTH, expand=True)
 
 # Widgets arranjados com Layout grid dentro de frame
 paddings = {'padx': 5, 'pady': 5} 
 
+toolbar = Frame(frame)
+toolbar.grid(column=0, row=0, sticky=(W, E), **paddings)
+
 # label
-label = ttk.Label(frame,  text='Paint:')
+label = ttk.Label(toolbar,  text='Paint:')
 label.grid(column=0, row=0, sticky=W, **paddings)
 
 # option menu
 tipo_figura_var = StringVar(root) # Guarda o tipo de figura selecionado no option menu
 option_menu = ttk.OptionMenu(
-    frame, tipo_figura_var,
+    toolbar, tipo_figura_var,
                              'Linha', 'Linha', 'Rabisco', 'Retangulo', 'Oval', 'Circulo','Poligono')
 option_menu.grid(column=1, row=0, sticky=W, **paddings)
+
+ttk.Separator(toolbar, orient=VERTICAL).grid(column=2, row=0, sticky='ns', padx=10)
 
 cor_borda_atual = StringVar(root, value='black')
  
@@ -58,36 +67,39 @@ def escolher_cor_preenchimento():
  
 
 # botão de escolher cor da borda
-botao_cor_borda = ttk.Button(frame, text='Cor da borda', command=escolher_cor_borda)
-botao_cor_borda.grid(column=2, row=0, sticky=W, **paddings)
+botao_cor_borda = ttk.Button(toolbar, text='Cor da borda', command=escolher_cor_borda)
+botao_cor_borda.grid(column=3, row=0, sticky=W, **paddings)
  
 # preview da cor de borda selecionada
-cor_borda_preview = Canvas(frame, width=20, height=20, background='black',
+cor_borda_preview = Canvas(toolbar, width=20, height=20, background='black',
                             highlightthickness=1, highlightbackground='gray')
-cor_borda_preview.grid(column=3, row=0, sticky=W, **paddings)
+cor_borda_preview.grid(column=4, row=0, sticky=W, **paddings)
  
 # botão de escolher cor de preenchimento
-botao_cor_preenchimento = ttk.Button(frame, text='Cor de preenchimento', command=escolher_cor_preenchimento)
-botao_cor_preenchimento.grid(column=4, row=0, sticky=W, **paddings)
+botao_cor_preenchimento = ttk.Button(toolbar, text='Cor de preenchimento', command=escolher_cor_preenchimento)
+botao_cor_preenchimento.grid(column=5, row=0, sticky=W, **paddings)
  
 # preview da cor de preenchimento selecionada
-cor_preenchimento_preview = Canvas(frame, width=20, height=20, background='red',
+cor_preenchimento_preview = Canvas(toolbar, width=20, height=20, background='red',
                                     highlightthickness=1, highlightbackground='gray')
-cor_preenchimento_preview.grid(column=5, row=0, sticky=W, **paddings)
+cor_preenchimento_preview.grid(column=6, row=0, sticky=W, **paddings)
  
 # checkbox para ativar/desativar o preenchimento das novas figuras
-checkbox_preencher = ttk.Checkbutton(frame, text='Preencher figura', variable=preencher_var)
-checkbox_preencher.grid(column=6, row=0, sticky=W, **paddings)
+checkbox_preencher = ttk.Checkbutton(toolbar, text='Preencher figura', variable=preencher_var)
+checkbox_preencher.grid(column=7, row=0, sticky=W, **paddings)
 
 dica_poligono = ttk.Label(
     frame,
     text='Polígono: clique para adicionar vértices, duplo-clique (ou botão direito) para fechar.'
 )
-dica_poligono.grid(column=0, row=2, columnspan=7, sticky=W, **paddings)
+dica_poligono.grid(column=0, row=1, sticky=W, **paddings)
 
 # Area de desenho
-canvas = Canvas(frame, bg='white', width=600, height=600)
-canvas.grid(column=0, row=1, columnspan=2, sticky=W, **paddings)
+canvas = Canvas(frame, bg='white')
+canvas.grid(column=0, row=2,  sticky=(N, S, E, W), **paddings)
+
+frame.grid_columnconfigure(0, weight=1)
+frame.grid_rowconfigure(2, weight=1)
 
 frame.pack()
 

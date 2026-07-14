@@ -1,5 +1,5 @@
 
-from figura import Linha, Retangulo, Oval, Circulo, Rabisco, Poligono
+from src.paint_ufs.Model.figura import Linha, Retangulo, Oval, Circulo, Rabisco, Poligono
 
 
 canvas = None
@@ -44,13 +44,13 @@ def iniciar_figura_nova(event):
     
     if tipo == 'Linha':
         figura_nova = Linha(event.x, event.y, event.x, event.y, cor_borda)
+    elif tipo == 'Rabisco':
+        figura_nova = Rabisco([(event.x, event.y)], cor_borda)
     elif tipo in CLASSES_FIGURA:
         classe = CLASSES_FIGURA[tipo]
         figura_nova = classe(event.x, event.y, event.x, event.y,
-                              cor_borda, cor_preenchimento)
-    else:  
-        figura_nova = Rabisco([(event.x, event.y)], cor_borda)
-
+                          cor_borda, cor_preenchimento)
+        
 # Quando mouse é movido com o botão pressionado
 def atualizar_figura_nova(event):
     if figura_nova is None or isinstance(figura_nova, Poligono):
