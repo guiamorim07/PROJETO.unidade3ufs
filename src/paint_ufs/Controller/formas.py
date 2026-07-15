@@ -1,6 +1,6 @@
 
 from src.paint_ufs.Model.figura import Linha, Retangulo, Oval, Circulo, Rabisco, Poligono
-
+from src.paint_ufs.Model.desenho import Desenho
 
 
 CLASSES_FIGURA= {  "Linha": Linha,
@@ -9,104 +9,111 @@ CLASSES_FIGURA= {  "Linha": Linha,
               "Circulo": Circulo,
                  "Rabisco": Rabisco,
                  "Poligono": Poligono,}
+
+
 class Controller:
-    def __init__(self, canvas, tipo_figura_var, cor_borda_atual, cor_preenchimento_atual, preencher_var,figura_nova):
-        self.canvas= canvas
-        self.tipo_figura_var= tipo_figura_var
-        self.cor_borda_atual = cor_borda_atual
-        self.cor_preenchimento_atual = cor_preenchimento_atual   
-        self.preencher_var = preencher_var
-
-        self.figuras = []
-        self.figura_nova = figura_nova
+    def __init__(self, view):
+        self.view = view
+        self.desenho = Desenho()
+        self._registrar_binds()
 
 
 
-    def obter_cor_preenchimento(self):
-        """Retorna a cor de preenchimento a usar, ou '' (transparente) se a opção de preencher estiver desligada."""
-        if self.preencher_var.get():
-            return self.cor_preenchimento_atual.get()
-        return ''
+    def _registrar_binds(self):
+        self.view.bind_canvas('<ButtonPress-1>', self.iniciar_figura_nova)
+        self.view.bind_canvas('<B1-Motion>', self.atualizar_figura_nova)
+        self.view.bind_canvas('<ButtonRelease-1>', self.incluir_figura_nova)
+        self.view.bind_canvas('<Motion>', self.mover_mouse)
+        self.view.bind_canvas('<Double-Button-1>', self.finalizar_poligono)
+        self.view.bind_canvas('<Button-3>', self.finalizar_poligono)
 
 
 
 # Quando mouse é pressionado
     def iniciar_figura_nova(self, event):
-     
-        tipo = self.tipo_figura_var.get()
-        cor_borda = self.cor_borda_atual.get()
-        cor_preenchimento = self.obter_cor_preenchimento()
-    
-        if tipo =='Poligono':
+        tipo = self.view.obter_tipo_figura()
+        cor_borda = self.view.obter_cor_borda()
+        cor_preenchimento = self.view.obter_cor_preenchimento()
+
+        if tipo == 'Poligono':
             self._iniciar_ou_continuar_poligono(event)
             return
-    
-    
+
         if tipo == 'Linha':
-            self.figura_nova = Linha(event.x, event.y, event.x, event.y, cor_borda)
+            figura = Linha(event.x, event.y, event.x, event.y, cor_borda)
         elif tipo == 'Rabisco':
-            self.figura_nova = Rabisco([(event.x, event.y)], cor_borda)
+            figura = Rabisco([(event.x, event.y)], cor_borda)
         elif tipo in CLASSES_FIGURA:
             classe = CLASSES_FIGURA[tipo]
-            self.figura_nova = classe(event.x, event.y, event.x, event.y,
-                          cor_borda, cor_preenchimento)
+            figura = classe(event.x, event.y, event.x, event.y,
+                             cor_borda, cor_preenchimento)
+        else:
+            return
         
+
+        self.desenho.definir_figura_nova(figura)
+
 # Quando mouse é movido com o botão pressionado
     def atualizar_figura_nova(self, event):
-        if self.figura_nova is None or isinstance(self.figura_nova, Poligono):
+        figura_nova = self.desenho.obter_figura_nova()
+        if figura_nova is None or isinstance(figura_nova, Poligono):
             return
-        self.figura_nova.atualizar(event.x, event.y)
-    
+        figura_nova.atualizar(event.x, event.y)
+
         self.desenhar_figuras()
         self.desenhar_figura_nova()
 
 # Quando mouse é solto
-    def incluir_figura_nova(self, event): 
-        if isinstance(self.figura_nova, Poligono):
+    def incluir_figura_nova(self, event):
+        figura_nova = self.desenho.obter_figura_nova()
+        if isinstance(figura_nova, Poligono):
             return  # polígono só é incluído quando finalizado (duplo-clique)
-        if self.figura_nova is not None and not self.figura_nova.incompleta():
-             self.figuras.append(self.figura_nova)
-        self.figura_nova= None     
+        if figura_nova is not None and not figura_nova.incompleta():
+            self.desenho.adicionar_figura(figura_nova)
+        self.desenho.limpar_figura_nova()
         self.desenhar_figuras()
 
     def _iniciar_ou_continuar_poligono(self, event):
-        
-        if isinstance(self.figura_nova, Poligono) and not self.figura_nova.finalizado:
-            self.figura_nova.adicionar_ponto(event.x, event.y)
+        figura_nova = self.desenho.obter_figura_nova()
+
+        if isinstance(figura_nova, Poligono) and not figura_nova.finalizado:
+            figura_nova.adicionar_ponto(event.x, event.y)
         else:
-            cor_borda = self.cor_borda_atual.get()
-            cor_preenchimento = self.obter_cor_preenchimento()
-            self.figura_nova = Poligono(event.x, event.y, cor_borda, cor_preenchimento)
+            cor_borda = self.view.obter_cor_borda()
+            cor_preenchimento = self.view.obter_cor_preenchimento()
+            figura_nova = Poligono(event.x, event.y, cor_borda, cor_preenchimento)
+            self.desenho.definir_figura_nova(figura_nova)
         self.desenhar_figuras()
         self.desenhar_figura_nova()
- 
  
     def mover_mouse(self, event):
         """Chamado em <Motion> (mouse se movendo, sem botão pressionado).
         Usado apenas para mostrar a prévia do próximo segmento do polígono."""
-        if isinstance(self.figura_nova, Poligono) and not self.figura_nova.finalizado:
-            self.figura_nova.atualizar_preview(event.x, event.y)
+        figura_nova = self.desenho.obter_figura_nova()
+        if isinstance(figura_nova, Poligono) and not figura_nova.finalizado:
+            figura_nova.atualizar_preview(event.x, event.y)
             self.desenhar_figuras()
             self.desenhar_figura_nova()
  
  
     def finalizar_poligono(self, event):
         """Chamado em duplo-clique (ou clique direito) para fechar o polígono."""
-        
-        if isinstance(self.figura_nova, Poligono):
-            self.figura_nova.finalizar()
-            if not self.figura_nova.incompleta():
-                self.figuras.append(self.figura_nova)
-            self.figura_nova = None
+        figura_nova = self.desenho.obter_figura_nova()
+        if isinstance(figura_nova, Poligono):
+            figura_nova.finalizar()
+            if not figura_nova.incompleta():
+                self.desenho.adicionar_figura(figura_nova)
+            self.desenho.limpar_figura_nova()
             self.desenhar_figuras()
 
 
 
     def desenhar_figuras(self):
-        self.canvas.delete("all")
-        for figura in self.figuras:
-            figura.desenhar(self.canvas)
+        self.view.limpar_canvas()
+        for figura in self.desenho.obter_figuras():
+            self.view.desenhar_figura(figura)
 
     def desenhar_figura_nova(self):
-        if self.figura_nova is not None:
-            self.figura_nova.desenhar(self.canvas, preview=True)
+        figura_nova = self.desenho.obter_figura_nova()
+        if figura_nova is not None:
+            self.view.desenhar_figura(figura_nova, preview=True)

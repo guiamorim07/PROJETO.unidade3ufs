@@ -2,10 +2,6 @@ from tkinter import *
 from tkinter import ttk
 from tkinter import colorchooser
 
- #criação da classe paintview pois o canvas, os StringVar, os botões — tudo vira self.algumacoisa, e só existe uma instância por vez, controlada. Quem for fazer o Controller favor levar em consideração o view!!       Ass: Bernardo (apague essa mensagem quando visualizar e for fazer o controller)
-
- #tambem deixei a outra parte (provavelmente encontrada em main.py) para a pessoa que for fazer alteração excluir as coisas que nao foram mais necessarias estar lá, já que provavelmente estarão na classe PaintView. CUIDADO NA HORA DE APAGAR COISAS DO MAIN.PY
-
 class PaintView:
     def __init__(self, root):
         self.root = root
