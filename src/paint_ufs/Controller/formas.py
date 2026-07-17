@@ -1,3 +1,7 @@
+#Falta atualizar o formas.py inplementando o ferramentas_de_arrastar e futuramente o ferramenta_poligono (quando fizer isso apague essa mensagem) Ass. Gustavo
+
+
+
 
 from src.paint_ufs.Model.figura import Linha, Retangulo, Oval, Circulo, Rabisco, Poligono
 from src.paint_ufs.Model.desenho import Desenho
