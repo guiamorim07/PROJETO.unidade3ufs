@@ -30,6 +30,15 @@ class Figura(ABC):
         pass
 
  
+ 
+    def para_dict(self): 
+        return {
+            "tipo": type(self).__name__,
+            **self.__dict__ }
+ 
+ 
+ 
+ 
 class Linha(Figura):
     def __init__(self, x0, y0, x1, y1, cor_borda):
         super().__init__(cor_borda, '')
@@ -50,7 +59,15 @@ class Linha(Figura):
     def incompleta(self):
         return (self.x0, self.y0) == (self.x1, self.y1)
         
-        
+    def para_dict(self):
+    
+        return { "tipo": type(self).__name__,
+                 "x0"  :  self.x0, 
+                 "y0"  : self.y0, 
+                 "x1"  : self.x1, 
+                 "y1"  : self.y1, 
+                 "cor_borda" : self.cor_borda}
+                 
     
      
  
@@ -74,6 +91,19 @@ class FiguraDoisPontos(Figura):
  
     def _cor_preenchimento_desenho(self, preview):
         return self.cor_preenchimento if not (preview and self.incompleta()) else ''
+    
+    def para_dict(self):
+     
+        return { "tipo": type(self).__name__,
+                 "x0"  :  self.x0, 
+                 "y0"  : self.y0, 
+                 "x1"  : self.x1, 
+                 "y1"  : self.y1, 
+                 "cor_borda" : self.cor_borda,
+                 "cor_preenchimento" : self.cor_preenchimento }
+    
+    
+    
     
    
  
@@ -124,8 +154,11 @@ class Rabisco(Figura):
     def incompleta(self):
         return len(self.pontos) <= 1
         
-        
-        
+    def para_dict(self): 
+       
+        return { "tipo": type(self).__name__,
+                 "pontos" : self.pontos,
+                 "cor_borda" : self.cor_borda}             
     
  
 class Poligono(Figura):
@@ -176,5 +209,85 @@ class Poligono(Figura):
  
     def incompleta(self):
         return (not self.finalizado) or len(self.pontos) < 3
+        
+        
+        
+     def para_dict(self):
+        return {
+            "tipo": type(self).__name__,
+            "cor_borda": self.cor_borda,
+            "cor_preenchimento": self.cor_preenchimento,
+            "pontos": self.pontos
+        }     
+ 
+ 
+ 
+ 
+        
+TIPO= {  "Linha": Linha,
+                "Retangulo": Retangulo,
+                 "Oval": Oval,
+              "Circulo": Circulo,
+                 "Rabisco": Rabisco,
+                 "Poligono": Poligono}        
+        
+        
+
+        
+class Arquivo: 
+    
+    def salvar(self, figuras, caminho):
+        dados = [figura.para_dict() for figura in figuras]
+        with open(caminho, "w") as arquivo:
+            json.dump(dados, arquivo)
+    
+    def abrir(self, caminho):
+        with open(caminho, "r") as arquivo:
+            dados = json.load(arquivo) 
+        return [self._criar_figura(d) for d in dados]
+    
+    
+    def _criar_figura(self, d): 
+        d = dict(d)
+        tipo = d.pop("tipo")
+        classe = TIPO[tipo]
+
+        if tipo == "Poligono":
+            pontos = d.pop("pontos")
+            x0, y0 = pontos[0]
+            figura = Poligono(x0, y0, d["cor_borda"], d["cor_preenchimento"])
+            for x, y in pontos[1:]:
+                figura.adicionar_ponto(x, y)
+            figura.finalizar()
+            return figura
+
+        return classe(**d)
+    
+    
+    
+    
+    
+          
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
         
         
