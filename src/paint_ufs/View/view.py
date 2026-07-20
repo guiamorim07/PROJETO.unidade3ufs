@@ -1,6 +1,7 @@
 from tkinter import *
 from tkinter import ttk
 from tkinter import colorchooser
+from tkinter import filedialog
 
 class PaintView:
     def __init__(self, root):
@@ -8,13 +9,27 @@ class PaintView:
         self.root.title("Paint")
         self.root.geometry("800x700")
 
+        self.menu_bar = Menu(self.root)
+        self.root.config(menu=self.menu_bar)
+
+        self.menu_arquivo = Menu(self.menu_bar, tearoff=0)
+        self.menu_bar.add_cascade(label='Arquivo', menu=self.menu_arquivo)
+
+        self.menu_arquivo.add_command(label='💾 Salvar', command=self._acionar_salvar)
+        self.menu_arquivo.add_command(label='📂 Abrir', command=self._acionar_abrir)
+
+
         self.frame = Frame(root)
         self.frame.pack(fill=BOTH, expand=True)
 
         paddings = {'padx': 5, 'pady': 5}
 
         self.toolbar = Frame(self.frame)
+        self.toolbar = Frame(self.frame, background="#887da3")
         self.toolbar.grid(column=0, row=0, sticky=(W, E), **paddings)
+
+        self.style = ttk.Style()
+        self.style.theme_use('clam')
 
         ttk.Label(self.toolbar, text='Paint:').grid(column=0, row=0, sticky=W, **paddings)
 
@@ -37,6 +52,8 @@ class PaintView:
                                          highlightthickness=1, highlightbackground='gray')
         self.cor_borda_preview.grid(column=4, row=0, sticky=W, **paddings)
 
+        self.canvas = Canvas(self.frame, bg='white', highlightthickness=1, highlightbackground='#cccccc')
+        
         ttk.Button(self.toolbar, text='Cor de preenchimento',
                    command=self._escolher_cor_preenchimento).grid(column=5, row=0, sticky=W, **paddings)
 
@@ -97,3 +114,23 @@ class PaintView:
         if cor:
             self.cor_preenchimento_atual.set(cor)
             self.cor_preenchimento_preview.config(background=cor)
+
+    # Metodo de arquivo
+
+    def definir_callback_salvar(self, callback):
+        self._callback_salvar = callback
+
+    def definir_callback_abrir(self, callback):
+        self._callback_abrir = callback
+
+    def _acionar_salvar(self):
+        caminho = filedialog.asksaveasfilename(defaultextension='.json', filetypes=[('Arquivo JSON', '*.json')])
+
+        if caminho and hasattr(self, '_callback_salvar'):
+            self._callback_salvar(caminho)
+
+    def _acionar_abrir(self):
+        caminho = filedialog.askopenfilename(filetypes=[('Arquivo JSON', '*.json')])
+
+        if caminho and hasattr(self, '_callback_abrir'):
+            self._callback_abrir(caminho)

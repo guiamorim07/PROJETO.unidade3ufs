@@ -212,7 +212,7 @@ class Poligono(Figura):
         
         
         
-     def para_dict(self):
+    def para_dict(self):
         return {
             "tipo": type(self).__name__,
             "cor_borda": self.cor_borda,
