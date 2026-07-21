@@ -17,3 +17,8 @@ class Desenho:
     
     def obter_figura_nova(self):
         return self.figura_nova
+    
+    def carregar_figuras(self, figuras):
+        
+        self.figuras = figuras
+        self.figura_nova = None

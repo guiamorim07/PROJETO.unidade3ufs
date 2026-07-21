@@ -1,6 +1,6 @@
 #Falta atualizar o formas.py inplementando o ferramentas_de_arrastar e futuramente o ferramenta_poligono (quando fizer isso apague essa mensagem) Ass. Gustavo
 
-
+from src.paint_ufs.Model.figura import Arquivo
 from src.paint_ufs.Model.desenho import Desenho
 from src.paint_ufs.Controller.ferramentas.ferramenta_de_arrastar import (
     FerramentaLinha, FerramentaRabisco, FerramentaRetangulo,
@@ -14,6 +14,7 @@ class Controller:
     def __init__(self, view):
         self.view = view
         self.desenho = Desenho()
+        self.arquivo = Arquivo()
         self.ferramentas = {
             "Linha": FerramentaLinha(),
             "Retangulo": FerramentaRetangulo(),
@@ -24,9 +25,22 @@ class Controller:
         } 
         
         self._registrar_binds()
+        self._registrar_callbacks_arquivo()
 
+    def _registrar_callbacks_arquivo(self):
+        self.view.definir_callback_salvar(self.salvar_desenho)
+        self.view.definir_callback_abrir(self.abrir_desenho)
 
+    def salvar_desenho(self, caminho):
+        self.arquivo.salvar(self.desenho.obter_figuras(), caminho)
 
+    def abrir_desenho(self, caminho):
+        figuras = self.arquivo.abrir(caminho)
+        self.desenho.carregar_figuras(figuras)
+        self._redesenhar()
+    
+    
+    
     def _registrar_binds(self):
         
         self.view.bind_canvas('<ButtonPress-1>', self._on_pressionar)
